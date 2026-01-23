@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "notion_cascade_insert"
+  site-url: "https://amezaikupan.github.io/notion_cascade_insert"
+  description: "Cascade inserting for Notion Database Automation (as log)"
+  repo-branch: main
+  repo-url: "https://github.com/amezaikupan/notion_cascade_insert"
