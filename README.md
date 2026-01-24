@@ -6,7 +6,7 @@
 ## Installing
 
 ``` python
-! pip install notion_cascade_insert
+# ! pip install notion_cascade_insert
 ```
 
 ## How to use
@@ -67,32 +67,32 @@ behavior, which Notion don’t support at the momment. For this, we would
 do something like:
 
 ``` python
-from notion_cascade_insert.core import TriggerDB, JunctionDB, LogDB, AutoLogger
-from notion_cascade_insert.webhook import NotionWebhook 
-from fastapi import FastAPI, Request 
-from notion_client import Client 
-import os
+# from notion_cascade_insert.core import TriggerDB, JunctionDB, LogDB, AutoLogger
+# from notion_cascade_insert.webhook import NotionWebhook 
+# from fastapi import FastAPI, Request 
+# from notion_client import Client 
+# import os
 ```
 
 ``` python
-notion = Client(auth=os.getenv("NOTION_TOKEN"))
+# notion = Client(auth=os.getenv("NOTION_TOKEN"))
 
-trigger = TriggerDB(os.getenv("PRODUCTION_PLAN_DB_ID"), notion, "Status", "Recipes", "Batches to make")
-junction = JunctionDB(os.getenv("RECIPE_INGREDIENTS_DB_ID"), notion, "Recipes", "Ingredient Inventory", "Amount per batch")
-log = LogDB(os.getenv("INGREDIENT_TRANSACTION_DB"), notion, "Ingredient", "Amount", "Production Plan", "Reason")
-db_logger = AutoLogger(trigger, junction, log, "In Process", -1)
+# trigger = TriggerDB(os.getenv("PRODUCTION_PLAN_DB_ID"), notion, "Status", "Recipes", "Batches to make")
+# junction = JunctionDB(os.getenv("RECIPE_INGREDIENTS_DB_ID"), notion, "Recipes", "Ingredient Inventory", "Amount per batch")
+# log = LogDB(os.getenv("INGREDIENT_TRANSACTION_DB"), notion, "Ingredient", "Amount", "Production Plan", "Reason")
+# db_logger = AutoLogger(trigger, junction, log, "In Process", -1)
 ```
 
 This will create your Ingredient Logger! Then you can set up your server
 like so:
 
 ``` python
-app = FastAPI()
+# app = FastAPI()
 
-@app.post("/webhook")
-async def webhook(request: Request):
-    hook = NotionWebhook(await request.json())
-    if hook.parent_db_id == os.getenv("PRODUCTION_PLAN_DB_ID"):
-        if hook.type == 'page.created': return {"result": db_logger.process(hook.entity_id)}
-    return {"status": "received"}
+# @app.post("/webhook")
+# async def webhook(request: Request):
+#     hook = NotionWebhook(await request.json())
+#     if hook.parent_db_id == os.getenv("PRODUCTION_PLAN_DB_ID"):
+#         if hook.type == 'page.created': return {"result": db_logger.process(hook.entity_id)}
+#     return {"status": "received"}
 ```
