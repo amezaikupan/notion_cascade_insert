@@ -9,24 +9,6 @@
 ! pip install notion_cascade_insert
 ```
 
-    Requirement already satisfied: notion_cascade_insert in /app/data/.local/lib/python3.12/site-packages (0.0.1)
-    Requirement already satisfied: fastcore in /usr/local/lib/python3.12/site-packages (from notion_cascade_insert) (1.12.2)
-    Requirement already satisfied: fastapi in /usr/local/lib/python3.12/site-packages (from notion_cascade_insert) (0.128.0)
-    Requirement already satisfied: notion_client in /app/data/.local/lib/python3.12/site-packages (from notion_cascade_insert) (2.7.0)
-    Requirement already satisfied: starlette<0.51.0,>=0.40.0 in /app/data/.local/lib/python3.12/site-packages (from fastapi->notion_cascade_insert) (0.50.0)
-    Requirement already satisfied: pydantic>=2.7.0 in /usr/local/lib/python3.12/site-packages (from fastapi->notion_cascade_insert) (2.12.5)
-    Requirement already satisfied: typing-extensions>=4.8.0 in /usr/local/lib/python3.12/site-packages (from fastapi->notion_cascade_insert) (4.15.0)
-    Requirement already satisfied: annotated-doc>=0.0.2 in /usr/local/lib/python3.12/site-packages (from fastapi->notion_cascade_insert) (0.0.4)
-    Requirement already satisfied: anyio<5,>=3.6.2 in /usr/local/lib/python3.12/site-packages (from starlette<0.51.0,>=0.40.0->fastapi->notion_cascade_insert) (4.12.1)
-    Requirement already satisfied: idna>=2.8 in /usr/local/lib/python3.12/site-packages (from anyio<5,>=3.6.2->starlette<0.51.0,>=0.40.0->fastapi->notion_cascade_insert) (3.11)
-    Requirement already satisfied: annotated-types>=0.6.0 in /usr/local/lib/python3.12/site-packages (from pydantic>=2.7.0->fastapi->notion_cascade_insert) (0.7.0)
-    Requirement already satisfied: pydantic-core==2.41.5 in /usr/local/lib/python3.12/site-packages (from pydantic>=2.7.0->fastapi->notion_cascade_insert) (2.41.5)
-    Requirement already satisfied: typing-inspection>=0.4.2 in /usr/local/lib/python3.12/site-packages (from pydantic>=2.7.0->fastapi->notion_cascade_insert) (0.4.2)
-    Requirement already satisfied: packaging in /usr/local/lib/python3.12/site-packages (from fastcore->notion_cascade_insert) (25.0)
-    Requirement already satisfied: httpx>=0.23.0 in /usr/local/lib/python3.12/site-packages (from notion_client->notion_cascade_insert) (0.28.1)
-    Requirement already satisfied: certifi in /usr/local/lib/python3.12/site-packages (from httpx>=0.23.0->notion_client->notion_cascade_insert) (2026.1.4)
-    Requirement already satisfied: httpcore==1.* in /usr/local/lib/python3.12/site-packages (from httpx>=0.23.0->notion_client->notion_cascade_insert) (1.0.9)
-    Requirement already satisfied: h11>=0.16 in /usr/local/lib/python3.12/site-packages (from httpcore==1.*->httpx>=0.23.0->notion_client->notion_cascade_insert) (0.16.0)
 
 ## How to use
 
