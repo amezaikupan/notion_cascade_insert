@@ -52,7 +52,9 @@ functions that we want.
 
 ### Example
 
-![Pipeline Diagram](img/mermaid-diagram-2026-01-24-204514.svg)
+<!-- <img src="img/mermaid-diagram-2026-01-24-213107.png"> -->
+
+<img src="img/mermaid-diagram-2026-01-24-213107.png" style="width: 100%; height: auto; max-height: none;">
 
 Let’s say we’re building a Bakery Inventory management database, and we
 want our `Production Plan` database to automatically log the used
