@@ -5,24 +5,13 @@
 # %% auto #0
 __all__ = ['Database', 'TriggerDB', 'JunctionDB', 'LogDB', 'AutoLogger']
 
-# %% ../nbs/00_core.ipynb #1b55fc1b
-__all__ = ['Database','TriggerDB','JunctionDB','LogDB','AutoLogger']
-
 # %% ../nbs/00_core.ipynb #68712bbc
 class Database:
-    """Base class for interacting with a Notion database.
-    
-    Attributes:
-        db_id (str): The Notion database ID
-        notion: The Notion client instance for API calls
-    """
-    def __init__(self, db_id, notion):
-        """Initialize a Database instance.
-        
-        Args:
-            db_id (str): The Notion database ID
-            notion: The Notion client instance
-        """
+    """Base class for interacting with a Notion database."""
+    def __init__(self, 
+            db_id, # Notion database ID
+            notion # Notion client instance 
+        ):
         self.db_id, self.notion = db_id, notion
     
     def get_schema(self):
@@ -36,40 +25,27 @@ class Database:
 
 # %% ../nbs/00_core.ipynb #52b04240
 class TriggerDB(Database):
-    """Database that triggers logging when updated.
-    
-    Monitors a database for status changes and extracts related item information
-    for downstream logging operations.
-    
-    Attributes:
-        db_id (str): The Notion database ID
-        notion: The Notion client instance for API calls
-        status_prop (str): Name of the status property to monitor
-        relation_prop (str): Name of the relation property linking to related items
-        qty_prop (str): Name of the numeric quantity property
     """
-    def __init__(self, db_id, notion, status_prop, relation_prop, qty_prop):
+    Database that triggers logging when updated.
+    """
+
+    def __init__(self, 
+                db_id, # Notion database ID 
+                notion, # Notion client instance 
+                status_prop, # Name of status property
+                relation_prop, # Name of relation property
+                qty_prop # Name of the quantity property
+        ):
         """Initialize a TriggerDB instance.
-        
-        Args:
-            db_id (str): The Notion database ID
-            notion: The Notion client instance
-            status_prop (str): Name of the status property
-            relation_prop (str): Name of the relation property
-            qty_prop (str): Name of the quantity property
         """
         super().__init__(db_id, notion)
         self.status_prop, self.relation_prop, self.qty_prop = status_prop, relation_prop, qty_prop
     
-    def get_page_data(self, page_id):
+    #| exec_doc
+    def get_page_data(self, 
+                    page_id # Notion page ID to retrieve (the row that trigger change)
+        ):
         """Extract status, related item ID, and quantity from a page.
-        
-        Args:
-            page_id (str): The Notion page ID to retrieve
-            
-        Returns:
-            tuple: (status, relation_id, qty) where status is str or None,
-                   relation_id is str or None, and qty is a number
         """
         page = self.notion.pages.retrieve(page_id)
         status = page['properties'][self.status_prop]['select']['name'] if page['properties'][self.status_prop]['select'] else None
@@ -83,33 +59,23 @@ class JunctionDB(Database):
     
     Acts as a many-to-many relationship table, storing which items are affected
     by a trigger and their respective amounts or multipliers.
-    
-    Attributes:
-        db_id (str): The Notion database ID
-        notion: The Notion client instance for API calls
-        relation_prop (str): Name of the property relating to trigger items
-        item_prop (str): Name of the property relating to log items
-        amount_prop (str): Name of the numeric amount/multiplier property
     """
-    def __init__(self, db_id, notion, relation_prop, item_prop, amount_prop):
-        """Initialize a JunctionDB instance.
-        
-        Args:
-            db_id (str): The Notion database ID
-            notion: The Notion client instance
-            relation_prop (str): Name of the relation property to trigger items
-            item_prop (str): Name of the relation property to log items
-            amount_prop (str): Name of the amount property
-        """
+    def __init__(self, 
+                db_id, # Notion database ID
+                notion, # Notion client instance 
+                relation_prop, # Name of relation property to trigger items 
+                item_prop, # Name of relation property to log items 
+                amount_prop # Name of amount propert 
+        ):
+      
         super().__init__(db_id, notion)
         self.relation_prop, self.item_prop, self.amount_prop = relation_prop, item_prop, amount_prop
     
-    def get_items(self, relation_id):
+    def get_items(self, 
+                relation_id # Trigger item's relation ID 
+        ):
         """Get all items and their amounts for a given relation.
-        
-        Args:
-            relation_id (str): The trigger item's relation ID
-            
+
         Returns:
             dict: Mapping of item IDs to their amounts, empty dict if no relation_id
         """
@@ -123,76 +89,52 @@ class LogDB(Database):
     
     Records all inventory or quantity changes with item references, amounts,
     triggering events, and reasons for the change.
-    
-    Attributes:
-        db_id (str): The Notion database ID
-        notion: The Notion client instance for API calls
-        item_prop (str): Name of the property relating to the affected item
-        amount_prop (str): Name of the numeric amount property (positive or negative)
-        trigger_prop (str): Name of the property relating back to the trigger
-        reason_prop (str): Name of the select property describing the reason
     """
-    def __init__(self, db_id, notion, item_prop, amount_prop, trigger_prop, reason_prop):
+
+    def __init__(self, 
+                db_id, # Notion database ID 
+                notion, # Notion client instance 
+                item_prop, # Name of item relation property 
+                amount_prop, # Name of the amount property 
+                trigger_prop, # Name of the trigger relation property 
+                reason_prop # Name of the reason select property
+            ):
         """Initialize a LogDB instance.
-        
-        Args:
-            db_id (str): The Notion database ID
-            notion: The Notion client instance
-            item_prop (str): Name of the item relation property
-            amount_prop (str): Name of the amount property
-            trigger_prop (str): Name of the trigger relation property
-            reason_prop (str): Name of the reason select property
         """
         super().__init__(db_id, notion)
         self.item_prop, self.amount_prop, self.trigger_prop, self.reason_prop = item_prop, amount_prop, trigger_prop, reason_prop
     
-    def create_entry(self, item_id, amount, trigger_id, reason):
+    def create_entry(self, 
+                    item_id, # ID of item being logged     
+                    amount, # Amount to log 
+                    trigger_id, # ID of triggering page  
+                    reason # Reason for log entry 
+        ):
         """Create a new log entry.
-        
-        Args:
-            item_id (str): The ID of the item being logged
-            amount (float): The amount to log (positive or negative)
-            trigger_id (str): The ID of the triggering page
-            reason (str): The reason for this log entry
         """
         self.notion.pages.create(parent={"database_id": self.db_id}, properties={self.item_prop: {"relation": [{"id": item_id}]}, self.amount_prop: {"number": amount}, self.trigger_prop: {"relation": [{"id": trigger_id}]}, self.reason_prop: {"select": {"name": reason}}})
 
-#| export
+
+
+# %% ../nbs/00_core.ipynb #b5e31e9a
 class AutoLogger:
     """Orchestrates automatic logging from trigger to log via junction.
     
     Monitors trigger database changes and automatically creates corresponding
     log entries by looking up related items through the junction database.
-    
-    Attributes:
-        trigger_db (TriggerDB): The database being monitored for changes
-        junction_db (JunctionDB): The database linking triggers to items
-        log_db (LogDB): The database where logs are written
-        trigger_status (str): The status that activates logging
-        multiplier (int): Multiplier for amounts (typically -1 for inventory deduction)
     """
-    def __init__(self, trigger_db, junction_db, log_db, trigger_status, multiplier=-1):
-        """Initialize an AutoLogger instance.
-        
-        Args:
-            trigger_db (TriggerDB): The trigger database instance
-            junction_db (JunctionDB): The junction database instance
-            log_db (LogDB): The log database instance
-            trigger_status (str): Status value that triggers logging
-            multiplier (int, optional): Amount multiplier. Defaults to -1.
-        """
+    def __init__(self, 
+                trigger_db, # TriggerDB instance
+                junction_db, # JunctionDB instance
+                log_db, # LogDB instance
+                trigger_status, # Status value that triggers logging
+                multiplier=-1 # Amount multiplier (typically -1 for deduction)
+        ):
         self.trigger_db, self.junction_db, self.log_db = trigger_db, junction_db, log_db
         self.trigger_status, self.multiplier = trigger_status, multiplier
     
     def process(self, page_id):
-        """Process a trigger page and create log entries.
-        
-        Args:
-            page_id (str): The trigger page ID to process
-            
-        Returns:
-            str: Status message describing the result
-        """
+        """Process a trigger page and create log entries."""
         status, relation_id, qty = self.trigger_db.get_page_data(page_id)
         if status != self.trigger_status: return f"Status is {status}, not {self.trigger_status}"
         items = self.junction_db.get_items(relation_id)
@@ -201,31 +143,19 @@ class AutoLogger:
         return f"Logged {len(items)} items"
     
     def cancel(self, page_id):
-        """Reverse all logs for a trigger (restore inventory).
-        
-        Args:
-            page_id (str): The trigger page ID to reverse
-            
-        Returns:
-            str: Status message describing the result
-        """
+        """Reverse all logs for a trigger (restore inventory)."""
         _, relation_id, qty = self.trigger_db.get_page_data(page_id)
         items = self.junction_db.get_items(relation_id)
         if not items: return "No items to reverse"
         for item_id, amt in items.items(): self.log_db.create_entry(item_id, -self.multiplier * qty * amt, page_id, 'cancelled')
         return f"Reversed {len(items)} items"
     
-    def adjust_batch(self, page_id, old_qty, new_qty):
-        """Log the difference when batch quantity changes.
-        
-        Args:
-            page_id (str): The trigger page ID being adjusted
-            old_qty (float): The previous quantity value
-            new_qty (float): The new quantity value
-            
-        Returns:
-            str: Status message describing the result
-        """
+    def adjust_batch(self, 
+                    page_id, # Trigger page ID being adjusted
+                    old_qty, # Previous quantity value
+                    new_qty # New quantity value
+        ):
+        """Log the difference when batch quantity changes."""
         status, relation_id, _ = self.trigger_db.get_page_data(page_id)
         if status != self.trigger_status: return f"Status is {status}, not active"
         items = self.junction_db.get_items(relation_id)
@@ -234,20 +164,12 @@ class AutoLogger:
         for item_id, amt in items.items(): self.log_db.create_entry(item_id, self.multiplier * delta * amt, page_id, 'batch_adjusted')
         return f"Adjusted {len(items)} items by {delta} batches"
     
-    def handle_update(self, page_id, old_status=None, old_qty=None):
-        """Handle any update to trigger page - detects what changed and acts accordingly.
-        
-        Intelligently determines what type of change occurred (status change, quantity
-        adjustment, or activation) and calls the appropriate handler method.
-        
-        Args:
-            page_id (str): The trigger page ID that was updated
-            old_status (str, optional): The previous status value. Defaults to None.
-            old_qty (float, optional): The previous quantity value. Defaults to None.
-            
-        Returns:
-            str: Status message describing the action taken
-        """
+    def handle_update(self, 
+                    page_id, # Trigger page ID that was updated
+                    old_status=None, # Previous status value
+                    old_qty=None # Previous quantity value
+        ):
+        """Handle any update to trigger page - detects what changed and acts accordingly."""
         status, _, qty = self.trigger_db.get_page_data(page_id)
         if old_status and old_status == self.trigger_status and status != self.trigger_status: return self.cancel(page_id)
         if status == self.trigger_status:

@@ -5,20 +5,14 @@
 # %% auto #0
 __all__ = ['NotionWebhook']
 
-# %% ../nbs/01_webhook.ipynb #af93ad65
+# %% ../nbs/01_webhook.ipynb #2ec50454
 class NotionWebhook:
-    """Handler for Notion webhook payloads.
+    """Handler for Notion webhook payloads."""
     
-    Attributes:
-        data: The raw webhook payload data
-        type: The type of webhook event
-        entity_id: The ID of the entity that triggered the webhook
-    """
-    def __init__(self, data):
+    def __init__(self, 
+                data # Dictionary containing the webhook payload from Notion
+        ):
         """Initialize the webhook handler with payload data.
-        
-        Args:
-            data: Dictionary containing the webhook payload from Notion
         """
         self.data = data
         self.type = data['type']

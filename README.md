@@ -9,33 +9,56 @@
 ! pip install notion_cascade_insert
 ```
 
-
 ## How to use
-
-### Use cases
-
-The one-to-many functionalities that we are refering to are:  
-- Manufacturing: BOM → materials  
-- Bakery: recipes → ingredients  
-- Events: guest lists → supplies  
-- Construction: projects → resources
 
 ### Building blocks
 
 This package is built to emulate the `Notion Automation` function but
-with one to many relation. Specifically, it works on the following
-building blocks: 
+with one to many relation. I built this to track the transactions (hence
+the log) that involves calculating in case where there is an big object
+that map to many other objects, like when you have a recipe and you want
+to get the ingredients, or when you have a lists of guests and you want
+to get their details… This helps you manage the ammoun of stuff that
+relate to that big object.
 
-1. **TriggerDB**: monitors a database for status
-changes  
-2. **JunctionDB**: looks up related items and amounts  
-3. **LogDB**: writes transaction logs  
-4. **AutoLogger**: orchestrates the flow
+There are 4 of the pipelines:
+
+1.  **TriggerDB**: monitors a database for status changes  
+2.  **JunctionDB**: looks up related items and amounts  
+3.  **LogDB**: writes transaction logs  
+4.  **AutoLogger**: orchestrates the flow
 
 We can than use them to connect to `Notion Webhook` and create the
 functions that we want.
 
 ### Example
+
+``` mermaid
+flowchart TB
+  subgraph Data["**Data Pipeline**"]
+    B[("<b>[TriggerDB]</b>: Production Plan </br> Bread batches")]
+    D[("<b>[JunctionDB]</b>: Recipe Ingredients<br/>Flour: 1kg/batch<br/>Yeast: 1g/batch")]
+    F[("<b>[LogDB]</b>: Transactions<br/>-2kg Flour<br/>-2g Yeast")]
+  end
+  
+  subgraph Actions["**[AutoLogger]** Actions"]
+    C{{🔍 Lookup Recipe}}
+    E{{🧮 Calculate<br/>1kg × 2 = 2kg<br/>1g × 2 = 2g}}
+    G{{📤 Write Logs}}
+  end
+  
+  A[🔔 Webhook] --> B
+  B --> C
+  C --> D
+  D --> E
+  E --> G
+  G --> F
+  F --> H[✅ Done]
+
+  %% Subgraph styling
+  style Data fill:#fff9c4,stroke:#fbc02d,stroke-width:1px
+  style Actions fill:#fff9c4,stroke:#fbc02d,stroke-width:1px
+```
 
 Let’s say we’re building a Bakery Inventory management database, and we
 want our `Production Plan` database to automatically log the used
@@ -44,10 +67,14 @@ behavior, which Notion don’t support at the momment. For this, we would
 do something like:
 
 ``` python
-from notion_cascade_insert.core import TriggerDB,JunctionDB,LogDB,AutoLogger
-from notion_client import Client
+from notion_cascade_insert.core import TriggerDB, JunctionDB, LogDB, AutoLogger
+from notion_cascade_insert.webhook import NotionWebhook 
+from fastapi import FastAPI, Request 
+from notion_client import Client 
 import os
+```
 
+``` python
 notion = Client(auth=os.getenv("NOTION_TOKEN"))
 
 trigger = TriggerDB(os.getenv("PRODUCTION_PLAN_DB_ID"), notion, "Status", "Recipes", "Batches to make")
@@ -60,9 +87,6 @@ This will create your Ingredient Logger! Then you can set up your server
 like so:
 
 ``` python
-from fastapi import FastAPI,Request
-from notion_cascade_insert.webhook import NotionWebhook
-
 app = FastAPI()
 
 @app.post("/webhook")
