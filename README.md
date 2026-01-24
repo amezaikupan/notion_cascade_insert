@@ -24,7 +24,9 @@ The one-to-many functionalities that we are refering to are:
 
 This package is built to emulate the `Notion Automation` function but
 with one to many relation. Specifically, it works on the following
-building blocks: 1. **TriggerDB**: monitors a database for status
+building blocks: 
+
+1. **TriggerDB**: monitors a database for status
 changes  
 2. **JunctionDB**: looks up related items and amounts  
 3. **LogDB**: writes transaction logs  
