@@ -33,7 +33,7 @@ functions that we want.
 
 ### Example
 
-<!-- <img src="img/mermaid-diagram-2026-01-24-213107.png"> -->
+<!-- <img src="img/nbs/mermaid-diagram-2026-01-24-213107.png"> -->
 
 <img src="img/mermaid-diagram-2026-01-24-213107.png" style="width: 100%; height: auto; max-height: none;">
 
