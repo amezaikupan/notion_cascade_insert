@@ -1,0 +1,52 @@
+[
+  {
+    "objectID": "core.html",
+    "href": "core.html",
+    "title": "core",
+    "section": "",
+    "text": "source\n\nDatabase\n\ndef Database(\n    db_id, # Notion database ID\n    notion, # Notion client instance\n):\n\nBase class for interacting with a Notion database.\n\nsource\n\n\nTriggerDB\n\ndef TriggerDB(\n    db_id, # Notion database ID\n    notion, # Notion client instance\n    status_prop, # Name of status property\n    relation_prop, # Name of relation property\n    qty_prop, # Name of the quantity property\n):\n\nDatabase that triggers logging when updated.\n\nsource\n\n\nLogDB\n\ndef LogDB(\n    db_id, # Notion database ID\n    notion, # Notion client instance\n    item_prop, # Name of item relation property\n    amount_prop, # Name of the amount property\n    trigger_prop, # Name of the trigger relation property\n    reason_prop, # Name of the reason select property\n):\n\nDatabase where transaction logs are written.\nRecords all inventory or quantity changes with item references, amounts, triggering events, and reasons for the change.\n\nsource\n\n\nJunctionDB\n\ndef JunctionDB(\n    db_id, # Notion database ID\n    notion, # Notion client instance\n    relation_prop, # Name of relation property to trigger items\n    item_prop, # Name of relation property to log items\n    amount_prop, # Name of amount propert\n):\n\nDatabase that connects trigger items to log items with amounts.\nActs as a many-to-many relationship table, storing which items are affected by a trigger and their respective amounts or multipliers.\n\nsource\n\n\nAutoLogger\n\ndef AutoLogger(\n    trigger_db, # TriggerDB instance\n    junction_db, # JunctionDB instance\n    log_db, # LogDB instance\n    trigger_status, # Status value that triggers logging\n    multiplier:int=-1, # Amount multiplier (typically -1 for deduction)\n):\n\nOrchestrates automatic logging from trigger to log via junction.\nMonitors trigger database changes and automatically creates corresponding log entries by looking up related items through the junction database.",
+    "crumbs": [
+      "core"
+    ]
+  },
+  {
+    "objectID": "webhook.html",
+    "href": "webhook.html",
+    "title": "Webhook",
+    "section": "",
+    "text": "source\n\nNotionWebhook\n\ndef NotionWebhook(\n    data, # Dictionary containing the webhook payload from Notion\n):\n\nHandler for Notion webhook payloads.",
+    "crumbs": [
+      "Webhook"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Notion Cascade Insert",
+    "section": "",
+    "text": "! pip install notion_cascade_insert",
+    "crumbs": [
+      "Notion Cascade Insert"
+    ]
+  },
+  {
+    "objectID": "index.html#installing",
+    "href": "index.html#installing",
+    "title": "Notion Cascade Insert",
+    "section": "",
+    "text": "! pip install notion_cascade_insert",
+    "crumbs": [
+      "Notion Cascade Insert"
+    ]
+  },
+  {
+    "objectID": "index.html#how-to-use",
+    "href": "index.html#how-to-use",
+    "title": "Notion Cascade Insert",
+    "section": "How to use",
+    "text": "How to use\n\nBuilding blocks\nThis package is built to emulate the Notion Automation function but with one to many relation. I built this to track the transactions (hence the log) that involves calculating in case where there is an big object that map to many other objects, like when you have a recipe and you want to get the ingredients, or when you have a lists of guests and you want to get their details… This helps you manage the ammoun of stuff that relate to that big object.\nThere are 4 of the pipelines:\n\nTriggerDB: monitors a database for status changes\n\nJunctionDB: looks up related items and amounts\n\nLogDB: writes transaction logs\n\nAutoLogger: orchestrates the flow\n\nWe can than use them to connect to Notion Webhook and create the functions that we want.\n\n\nExample\n\n\nLet’s say we’re building a Bakery Inventory management database, and we want our Production Plan database to automatically log the used ingredients in a recipe that we want to make. This is a one-to-many behavior, which Notion don’t support at the momment. For this, we would do something like:\n\nfrom notion_cascade_insert.core import TriggerDB, JunctionDB, LogDB, AutoLogger\nfrom notion_cascade_insert.webhook import NotionWebhook \nfrom fastapi import FastAPI, Request \nfrom notion_client import Client \nimport os\n\n\nnotion = Client(auth=os.getenv(\"NOTION_TOKEN\"))\n\ntrigger = TriggerDB(os.getenv(\"PRODUCTION_PLAN_DB_ID\"), notion, \"Status\", \"Recipes\", \"Batches to make\")\njunction = JunctionDB(os.getenv(\"RECIPE_INGREDIENTS_DB_ID\"), notion, \"Recipes\", \"Ingredient Inventory\", \"Amount per batch\")\nlog = LogDB(os.getenv(\"INGREDIENT_TRANSACTION_DB\"), notion, \"Ingredient\", \"Amount\", \"Production Plan\", \"Reason\")\ndb_logger = AutoLogger(trigger, junction, log, \"In Process\", -1)\n\nThis will create your Ingredient Logger! Then you can set up your server like so:\n\napp = FastAPI()\n\n@app.post(\"/webhook\")\nasync def webhook(request: Request):\n    hook = NotionWebhook(await request.json())\n    if hook.parent_db_id == os.getenv(\"PRODUCTION_PLAN_DB_ID\"):\n        if hook.type == 'page.created': return {\"result\": db_logger.process(hook.entity_id)}\n    return {\"status\": \"received\"}",
+    "crumbs": [
+      "Notion Cascade Insert"
+    ]
+  }
+]
